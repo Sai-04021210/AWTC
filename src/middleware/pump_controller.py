@@ -26,23 +26,30 @@ DEFAULT_BROKER = "localhost"
 DEFAULT_PORT = 1883
 DEFAULT_LEVEL_TOPIC = "water/level"
 DEFAULT_PUMP_TOPIC = "water/pump"
+DEFAULT_MANUAL_TOPIC = "water/manual"
+DEFAULT_MANUAL_CONTROL_TOPIC = "water/pump/manual"
 DEFAULT_HIGH_THRESHOLD = 80  # Turn off pump when water level is above 80%
 DEFAULT_LOW_THRESHOLD = 20   # Turn on pump when water level is below 20%
 
 class PumpController:
     def __init__(self, broker=DEFAULT_BROKER, port=DEFAULT_PORT,
                  level_topic=DEFAULT_LEVEL_TOPIC, pump_topic=DEFAULT_PUMP_TOPIC,
+                 manual_topic=DEFAULT_MANUAL_TOPIC, manual_control_topic=DEFAULT_MANUAL_CONTROL_TOPIC,
                  high_threshold=DEFAULT_HIGH_THRESHOLD, low_threshold=DEFAULT_LOW_THRESHOLD):
         """Initialize the pump controller."""
         self.broker = broker
         self.port = port
         self.level_topic = level_topic
         self.pump_topic = pump_topic
+        self.manual_topic = manual_topic
+        self.manual_control_topic = manual_control_topic
         self.high_threshold = high_threshold
         self.low_threshold = low_threshold
         self.client = None
         self.pump_status = False  # False = OFF, True = ON
+        self.manual_mode = False  # Auto mode by default
         self.connected = False
+        self.current_level = 50.0  # Default level
 
     def connect_mqtt(self):
         """Connect to the MQTT broker."""
@@ -65,11 +72,18 @@ class PumpController:
         if rc == 0:
             self.connected = True
             logger.info("Connected to MQTT broker")
+
             # Subscribe to water level topic
             self.client.subscribe(self.level_topic)
             logger.info(f"Subscribed to {self.level_topic}")
-            # Publish initial pump status
+
+            # Subscribe to manual control topic
+            self.client.subscribe(self.manual_control_topic)
+            logger.info(f"Subscribed to {self.manual_control_topic}")
+
+            # Publish initial pump status and manual mode
             self._publish_pump_status()
+            self._publish_manual_mode()
         else:
             logger.error(f"Failed to connect to MQTT broker with code {rc}")
 
@@ -82,12 +96,44 @@ class PumpController:
         """Callback for when a message is received from the broker."""
         try:
             payload = json.loads(msg.payload.decode())
-            logger.debug(f"Received message: {payload}")
+            logger.debug(f"Received message on topic {msg.topic}: {payload}")
 
-            if 'level_percentage' in payload:
-                self._process_water_level(payload['level_percentage'])
-            else:
-                logger.warning(f"Received message without level_percentage: {payload}")
+            if msg.topic == self.level_topic:
+                if 'level_percentage' in payload:
+                    self.current_level = payload['level_percentage']
+                    if not self.manual_mode:
+                        self._process_water_level(self.current_level)
+                else:
+                    logger.warning(f"Received level message without level_percentage: {payload}")
+
+            elif msg.topic == self.manual_control_topic:
+                # Handle manual pump control
+                if 'status' in payload:
+                    self.manual_mode = True
+                    self._publish_manual_mode()
+
+                    new_status = payload['status'] == 'ON'
+                    if new_status != self.pump_status:
+                        logger.info(f"Manual control: Setting pump to {'ON' if new_status else 'OFF'}")
+                        self.pump_status = new_status
+                        self._publish_pump_status()
+                elif 'value' in payload:
+                    self.manual_mode = True
+                    self._publish_manual_mode()
+
+                    new_status = bool(payload['value'])
+                    if new_status != self.pump_status:
+                        logger.info(f"Manual control: Setting pump to {'ON' if new_status else 'OFF'}")
+                        self.pump_status = new_status
+                        self._publish_pump_status()
+                elif 'manual' in payload and not payload['manual']:
+                    # Switch back to auto mode
+                    self.manual_mode = False
+                    logger.info("Switching back to automatic mode")
+                    self._publish_manual_mode()
+                    # Process current level to update pump status
+                    self._process_water_level(self.current_level)
+
         except json.JSONDecodeError:
             logger.error(f"Failed to decode JSON message: {msg.payload}")
         except Exception as e:
@@ -118,17 +164,39 @@ class PumpController:
             payload = json.dumps({
                 "status": status_str,
                 "value": 1 if self.pump_status else 0,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
+                "manual": self.manual_mode
             })
 
             result = self.client.publish(self.pump_topic, payload)
 
             if result.rc == mqtt.MQTT_ERR_SUCCESS:
-                logger.info(f"Published pump status: {status_str}")
+                logger.info(f"Published pump status: {status_str} (Manual mode: {self.manual_mode})")
             else:
                 logger.error(f"Failed to publish pump status: {result}")
         except Exception as e:
             logger.error(f"Error publishing pump status: {e}")
+
+    def _publish_manual_mode(self):
+        """Publish manual mode status to MQTT topic."""
+        if not self.connected:
+            logger.warning("Not connected to MQTT broker, cannot publish manual mode status")
+            return
+
+        try:
+            payload = json.dumps({
+                "manual": self.manual_mode,
+                "timestamp": datetime.now().isoformat()
+            })
+
+            result = self.client.publish(self.manual_topic, payload)
+
+            if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                logger.info(f"Published manual mode status: {'ON' if self.manual_mode else 'OFF'}")
+            else:
+                logger.error(f"Failed to publish manual mode status: {result}")
+        except Exception as e:
+            logger.error(f"Error publishing manual mode status: {e}")
 
     def run(self):
         """Run the pump controller."""
@@ -160,6 +228,10 @@ def parse_arguments():
                         help='MQTT topic to subscribe for water level')
     parser.add_argument('--pump-topic', default=DEFAULT_PUMP_TOPIC,
                         help='MQTT topic to publish pump status')
+    parser.add_argument('--manual-topic', default=DEFAULT_MANUAL_TOPIC,
+                        help='MQTT topic to publish manual mode status')
+    parser.add_argument('--manual-control-topic', default=DEFAULT_MANUAL_CONTROL_TOPIC,
+                        help='MQTT topic to receive manual control commands')
     parser.add_argument('--high-threshold', type=float, default=DEFAULT_HIGH_THRESHOLD,
                         help='High water level threshold percentage to turn pump OFF')
     parser.add_argument('--low-threshold', type=float, default=DEFAULT_LOW_THRESHOLD,
@@ -173,6 +245,8 @@ if __name__ == "__main__":
         port=args.port,
         level_topic=args.level_topic,
         pump_topic=args.pump_topic,
+        manual_topic=args.manual_topic,
+        manual_control_topic=args.manual_control_topic,
         high_threshold=args.high_threshold,
         low_threshold=args.low_threshold
     )
