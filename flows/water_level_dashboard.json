@@ -1,0 +1,263 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Water Level Monitoring",
+        "disabled": false,
+        "info": "Water level monitoring and pump control dashboard created on October 10, 2023"
+    },
+    {
+        "id": "3a8d4c2b.c8c564",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level",
+        "topic": "water/level",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "b1d8c8d9.7b7b38",
+                "f4e380a2.d2c8b",
+                "6a5714a4.7c4fcc"
+            ]
+        ]
+    },
+    {
+        "id": "b1d8c8d9.7b7b38",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Water Level",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f4e380a2.d2c8b",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level Gauge",
+        "group": "7c68c9dc.80a128",
+        "order": 1,
+        "width": 6,
+        "height": 5,
+        "gtype": "wave",
+        "title": "Water Level",
+        "label": "%",
+        "format": "{{msg.payload.level_percentage}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#ff0000",
+            "#e6e600",
+            "#00b500"
+        ],
+        "seg1": "20",
+        "seg2": "80",
+        "x": 380,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "6a5714a4.7c4fcc",
+        "type": "ui_chart",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level History",
+        "group": "7c68c9dc.80a128",
+        "order": 2,
+        "width": 12,
+        "height": 6,
+        "label": "Water Level History",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "x": 380,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d8b9f25d.14f4c",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Pump Status",
+        "topic": "water/pump",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 130,
+        "y": 280,
+        "wires": [
+            [
+                "e5d35e63.1a979",
+                "a7f4d9d2.5b7b58"
+            ]
+        ]
+    },
+    {
+        "id": "e5d35e63.1a979",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Pump Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "a7f4d9d2.5b7b58",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "7c68c9dc.80a128",
+        "order": 3,
+        "width": 6,
+        "height": 2,
+        "name": "Pump Status",
+        "label": "Pump Status",
+        "format": "{{msg.payload.status}}",
+        "layout": "row-spread",
+        "x": 370,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "c6a8d9d1.4c1c68",
+        "type": "ui_button",
+        "z": "f6f2187d.f17ca8",
+        "name": "Manual Pump Control",
+        "group": "7c68c9dc.80a128",
+        "order": 4,
+        "width": 6,
+        "height": 2,
+        "passthru": false,
+        "label": "Toggle Pump",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "fa-power-off",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "water/pump/manual",
+        "topicType": "str",
+        "x": 150,
+        "y": 340,
+        "wires": [
+            [
+                "f9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "f9b7e8d2.c5b8c8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Toggle Pump",
+        "func": "// This is just a placeholder for manual control\n// In a real implementation, this would interact with the pump controller\nconst currentStatus = flow.get('pumpStatus') || false;\nconst newStatus = !currentStatus;\n\nflow.set('pumpStatus', newStatus);\n\nreturn {\n    payload: {\n        status: newStatus ? 'ON' : 'OFF',\n        value: newStatus ? 1 : 0,\n        timestamp: new Date().toISOString(),\n        manual: true\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 340,
+        "wires": [
+            [
+                "3b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "3b8c7d9e.4f9b42",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Manual Control",
+        "topic": "water/pump/manual",
+        "qos": "",
+        "retain": "",
+        "broker": "5b277f9b.9d604",
+        "x": 610,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "5b277f9b.9d604",
+        "type": "mqtt-broker",
+        "name": "Local MQTT Broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "7c68c9dc.80a128",
+        "type": "ui_group",
+        "name": "Water Tank",
+        "tab": "a4e2d87d.324b68",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "a4e2d87d.324b68",
+        "type": "ui_tab",
+        "name": "Water Level Monitoring",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
