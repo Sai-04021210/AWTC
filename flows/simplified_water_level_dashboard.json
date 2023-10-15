@@ -1,0 +1,681 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Simplified Water Level Dashboard",
+        "disabled": false,
+        "info": "Simplified water level monitoring and pump control dashboard"
+    },
+    {
+        "id": "5b277f9b.9d604",
+        "type": "mqtt-broker",
+        "name": "Local MQTT Broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "3a8d4c2b.c8c564",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level",
+        "topic": "water/level",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "b1d8c8d9.7b7b38",
+                "f4e380a2.d2c8b",
+                "format_for_chart"
+            ]
+        ]
+    },
+    {
+        "id": "format_for_chart",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Format for Chart",
+        "func": "// Extract level percentage for chart\nreturn {\n    topic: \"Water Level\",\n    payload: msg.payload.level_percentage\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 180,
+        "wires": [
+            [
+                "6a5714a4.7c4fcc"
+            ]
+        ]
+    },
+    {
+        "id": "b1d8c8d9.7b7b38",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Water Level",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f4e380a2.d2c8b",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level",
+        "group": "e4e9f5b.f17ca8",
+        "order": 1,
+        "width": 6,
+        "height": 5,
+        "gtype": "wave",
+        "title": "Water Level",
+        "label": "%",
+        "format": "{{msg.payload.level_percentage}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#ff0000",
+            "#e6e600",
+            "#00b500"
+        ],
+        "seg1": "20",
+        "seg2": "80",
+        "className": "",
+        "x": 370,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "6a5714a4.7c4fcc",
+        "type": "ui_chart",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level History",
+        "group": "e4e9f5b.f17ca8",
+        "order": 2,
+        "width": 6,
+        "height": 5,
+        "label": "Water Level History",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 390,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7b8c7d9e.4f9b42",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Pump Status",
+        "topic": "water/pump",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "8b8c7d9e.4f9b42",
+                "9b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "8b8c7d9e.4f9b42",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Pump Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "9b8c7d9e.4f9b42",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "f4e9f5b.f17ca8",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "name": "Pump Status",
+        "label": "Pump Status:",
+        "format": "{{msg.payload.status}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 370,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "a9b7e8d2.c5b8c8",
+        "type": "ui_switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Manual Pump Control",
+        "label": "Pump",
+        "tooltip": "",
+        "group": "f4e9f5b.f17ca8",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 150,
+        "y": 360,
+        "wires": [
+            [
+                "b9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "b9b7e8d2.c5b8c8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Format Manual Control",
+        "func": "// Set manual mode to true and set pump status\nreturn {\n    payload: {\n        status: msg.payload ? \"ON\" : \"OFF\",\n        value: msg.payload ? 1 : 0,\n        manual: true,\n        timestamp: new Date().toISOString()\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 360,
+        "wires": [
+            [
+                "c9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "c9b7e8d2.c5b8c8",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Manual Control",
+        "topic": "water/pump/manual",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 630,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "d9b7e8d2.c5b8c8",
+        "type": "ui_button",
+        "z": "f6f2187d.f17ca8",
+        "name": "Auto Mode Button",
+        "group": "f4e9f5b.f17ca8",
+        "order": 3,
+        "width": 3,
+        "height": 1,
+        "passthru": false,
+        "label": "Auto Mode",
+        "tooltip": "Switch to automatic control mode",
+        "color": "",
+        "bgcolor": "#4CAF50",
+        "className": "",
+        "icon": "fa-cogs",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 130,
+        "y": 420,
+        "wires": [
+            [
+                "e9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "manual_mode_button",
+        "type": "ui_button",
+        "z": "f6f2187d.f17ca8",
+        "name": "Manual Mode Button",
+        "group": "f4e9f5b.f17ca8",
+        "order": 4,
+        "width": 3,
+        "height": 1,
+        "passthru": false,
+        "label": "Manual Mode",
+        "tooltip": "Switch to manual control mode",
+        "color": "",
+        "bgcolor": "#2196F3",
+        "className": "",
+        "icon": "fa-hand-paper-o",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 130,
+        "y": 380,
+        "wires": [
+            [
+                "manual_mode_function"
+            ]
+        ]
+    },
+    {
+        "id": "manual_mode_function",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Switch to Manual Mode",
+        "func": "// Switch to manual mode\nreturn {\n    payload: {\n        manual: true,\n        timestamp: new Date().toISOString()\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 380,
+        "wires": [
+            [
+                "manual_mode_mqtt"
+            ]
+        ]
+    },
+    {
+        "id": "manual_mode_mqtt",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Manual Mode",
+        "topic": "water/pump/manual",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 610,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "e9b7e8d2.c5b8c8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Switch to Auto Mode",
+        "func": "// Switch to auto mode\nreturn {\n    payload: {\n        manual: false,\n        timestamp: new Date().toISOString()\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 420,
+        "wires": [
+            [
+                "2b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "2b8c7d9e.4f9b42",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Manual Mode",
+        "topic": "water/pump/manual",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 610,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "3b8c7d9e.4f9b42",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Manual Mode Status",
+        "topic": "water/manual",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 150,
+        "y": 480,
+        "wires": [
+            [
+                "4b8c7d9e.4f9b42",
+                "5b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "4b8c7d9e.4f9b42",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Manual Mode",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 390,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "5b8c7d9e.4f9b42",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "f4e9f5b.f17ca8",
+        "order": 4,
+        "width": 6,
+        "height": 1,
+        "name": "Control Mode",
+        "label": "Control Mode:",
+        "format": "{{msg.payload.manual ? \"Manual\" : \"Auto\"}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 380,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "6b8c7d9e.4f9b42",
+        "type": "ui_numeric",
+        "z": "f6f2187d.f17ca8",
+        "name": "High Threshold",
+        "label": "High Threshold (%)",
+        "tooltip": "",
+        "group": "g4e9f5b.f17ca8",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "wrap": false,
+        "passthru": true,
+        "topic": "topic",
+        "topicType": "msg",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "step": 1,
+        "className": "",
+        "x": 140,
+        "y": 600,
+        "wires": [
+            [
+                "7b8c7d9e.4f9b43"
+            ]
+        ]
+    },
+    {
+        "id": "7b8c7d9e.4f9b43",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Format High Threshold",
+        "func": "return {\n    payload: {\n        high_threshold: msg.payload\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 600,
+        "wires": [
+            [
+                "8b8c7d9e.4f9b43"
+            ]
+        ]
+    },
+    {
+        "id": "8b8c7d9e.4f9b43",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish High Threshold",
+        "topic": "water/threshold/high",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 630,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "9b8c7d9e.4f9b43",
+        "type": "ui_numeric",
+        "z": "f6f2187d.f17ca8",
+        "name": "Low Threshold",
+        "label": "Low Threshold (%)",
+        "tooltip": "",
+        "group": "g4e9f5b.f17ca8",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "wrap": false,
+        "passthru": true,
+        "topic": "topic",
+        "topicType": "msg",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "step": 1,
+        "className": "",
+        "x": 140,
+        "y": 660,
+        "wires": [
+            [
+                "a9b7e8d2.c5b8c9"
+            ]
+        ]
+    },
+    {
+        "id": "a9b7e8d2.c5b8c9",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Format Low Threshold",
+        "func": "return {\n    payload: {\n        low_threshold: msg.payload\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 660,
+        "wires": [
+            [
+                "b9b7e8d2.c5b8c9"
+            ]
+        ]
+    },
+    {
+        "id": "b9b7e8d2.c5b8c9",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Low Threshold",
+        "topic": "water/threshold/low",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 630,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "c9b7e8d2.c5b8c9",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "g4e9f5b.f17ca8",
+        "order": 3,
+        "width": 6,
+        "height": 1,
+        "name": "Inflow Rate",
+        "label": "Inflow Rate (Pump to Tank):",
+        "format": "{{msg.payload.inflow_rate}} L/min",
+        "layout": "row-spread",
+        "className": "",
+        "x": 370,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "d9b7e8d2.c5b8c9",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Flow Rate",
+        "topic": "water/level",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 130,
+        "y": 720,
+        "wires": [
+            [
+                "c9b7e8d2.c5b8c9",
+                "outflow_rate_text"
+            ]
+        ]
+    },
+    {
+        "id": "outflow_rate_text",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "g4e9f5b.f17ca8",
+        "order": 4,
+        "width": 6,
+        "height": 1,
+        "name": "Outflow Rate",
+        "label": "Outflow Rate (Tank to Outlet):",
+        "format": "{{msg.payload.outflow_rate}} L/min",
+        "layout": "row-spread",
+        "className": "",
+        "x": 370,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "e4e9f5b.f17ca8",
+        "type": "ui_group",
+        "name": "Water Level",
+        "tab": "d4e9f5b.f17ca8",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "f4e9f5b.f17ca8",
+        "type": "ui_group",
+        "name": "Pump Control",
+        "tab": "d4e9f5b.f17ca8",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "g4e9f5b.f17ca8",
+        "type": "ui_group",
+        "name": "Settings",
+        "tab": "d4e9f5b.f17ca8",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "d4e9f5b.f17ca8",
+        "type": "ui_tab",
+        "name": "Water Level Control",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
