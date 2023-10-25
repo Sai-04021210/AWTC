@@ -1,0 +1,73 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Simple Water Level Test",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "3a8d4c2b.c8c564",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level",
+        "topic": "water/level",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "b1d8c8d9.7b7b38"
+            ]
+        ]
+    },
+    {
+        "id": "b1d8c8d9.7b7b38",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Water Level",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "5b277f9b.9d604",
+        "type": "mqtt-broker",
+        "name": "Local MQTT Broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    }
+]

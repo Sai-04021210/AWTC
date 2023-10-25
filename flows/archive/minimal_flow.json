@@ -1,0 +1,65 @@
+[
+    {
+        "id": "a4e2d87d.324b68",
+        "type": "tab",
+        "label": "Minimal Test",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "5b277f9b.9d604",
+        "type": "mqtt-broker",
+        "name": "Local MQTT Broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "3a8d4c2b.c8c564",
+        "type": "mqtt in",
+        "z": "a4e2d87d.324b68",
+        "name": "Water Level",
+        "topic": "water/level",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "b1d8c8d9.7b7b38"
+            ]
+        ]
+    },
+    {
+        "id": "b1d8c8d9.7b7b38",
+        "type": "debug",
+        "z": "a4e2d87d.324b68",
+        "name": "Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 330,
+        "y": 120,
+        "wires": []
+    }
+]

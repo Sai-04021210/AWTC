@@ -1,0 +1,121 @@
+[
+    {
+        "id": "clean_tank_button",
+        "type": "ui_button",
+        "z": "f6f2187d.f17ca8",
+        "name": "Clean Tank Button",
+        "group": "g4e9f5b.f17ca8",
+        "order": 5,
+        "width": 6,
+        "height": 1,
+        "passthru": false,
+        "label": "Clean Tank",
+        "tooltip": "Start tank cleaning (increases outflow rate)",
+        "color": "",
+        "bgcolor": "#E91E63",
+        "className": "",
+        "icon": "fa-tint",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 130,
+        "y": 840,
+        "wires": [
+            [
+                "clean_tank_function"
+            ]
+        ]
+    },
+    {
+        "id": "clean_tank_function",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Toggle Cleaning Mode",
+        "func": "// Get current cleaning state from flow context or default to false\nconst currentCleaningMode = flow.get('cleaningMode') || false;\n\n// Toggle the cleaning mode\nconst newCleaningMode = !currentCleaningMode;\n\n// Store the new state in flow context\nflow.set('cleaningMode', newCleaningMode);\n\n// Create message payload\nreturn {\n    payload: {\n        cleaning: newCleaningMode,\n        timestamp: new Date().toISOString()\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 840,
+        "wires": [
+            [
+                "clean_tank_mqtt",
+                "clean_tank_status"
+            ]
+        ]
+    },
+    {
+        "id": "clean_tank_mqtt",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Cleaning Mode",
+        "topic": "water/cleaning",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 630,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "clean_tank_status",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "g4e9f5b.f17ca8",
+        "order": 6,
+        "width": 6,
+        "height": 1,
+        "name": "Cleaning Status",
+        "label": "Cleaning Mode:",
+        "format": "{{msg.payload.cleaning ? \"ON\" : \"OFF\"}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 630,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "cleaning_mode_status",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Cleaning Mode Status",
+        "topic": "water/level",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 150,
+        "y": 900,
+        "wires": [
+            [
+                "cleaning_mode_function"
+            ]
+        ]
+    },
+    {
+        "id": "cleaning_mode_function",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Extract Cleaning Mode",
+        "func": "// Store cleaning mode in flow context\nif (msg.payload.cleaning_mode !== undefined) {\n    flow.set('cleaningMode', msg.payload.cleaning_mode);\n}\n\n// Format message for display\nreturn {\n    payload: {\n        cleaning: msg.payload.cleaning_mode\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 900,
+        "wires": [
+            [
+                "clean_tank_status"
+            ]
+        ]
+    }
+]

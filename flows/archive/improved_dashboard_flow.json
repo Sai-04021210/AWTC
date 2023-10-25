@@ -1,0 +1,653 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Water Level Dashboard",
+        "disabled": false,
+        "info": "Water level monitoring and pump control dashboard with configurable thresholds"
+    },
+    {
+        "id": "5b277f9b.9d604",
+        "type": "mqtt-broker",
+        "name": "Local MQTT Broker",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "a4e2d87d.324b68",
+        "type": "ui_tab",
+        "name": "Water Level Monitoring",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "7c68c9dc.80a128",
+        "type": "ui_group",
+        "name": "Water Tank Status",
+        "tab": "a4e2d87d.324b68",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "8c68c9dc.80a128",
+        "type": "ui_group",
+        "name": "Control Settings",
+        "tab": "a4e2d87d.324b68",
+        "order": 2,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "db8dc46b1bdc565a",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "3a8d4c2b.c8c564",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level",
+        "topic": "water/level",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [
+                "b1d8c8d9.7b7b38",
+                "f4e380a2.d2c8b",
+                "6a5714a4.7c4fcc",
+                "a2c7d9e1.4f9b42",
+                "e7a8d9d1.4c1c68",
+                "f7a8d9d1.4c1c68"
+            ]
+        ]
+    },
+    {
+        "id": "b1d8c8d9.7b7b38",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Water Level",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f4e380a2.d2c8b",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level Gauge",
+        "group": "7c68c9dc.80a128",
+        "order": 1,
+        "width": 6,
+        "height": 5,
+        "gtype": "wave",
+        "title": "Water Level",
+        "label": "%",
+        "format": "{{msg.payload.level_percentage}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#ff0000",
+            "#e6e600",
+            "#00b500"
+        ],
+        "seg1": "{{flow.low_threshold}}",
+        "seg2": "{{flow.high_threshold}}",
+        "className": "",
+        "x": 380,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "6a5714a4.7c4fcc",
+        "type": "ui_chart",
+        "z": "f6f2187d.f17ca8",
+        "name": "Water Level History",
+        "group": "7c68c9dc.80a128",
+        "order": 2,
+        "width": 12,
+        "height": 6,
+        "label": "Water Level History",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 610,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d8b9f25d.14f4c",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Pump Status",
+        "topic": "water/pump",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 280,
+        "wires": [
+            [
+                "e5d35e63.1a979",
+                "a7f4d9d2.5b7b58",
+                "b2c7d9e1.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "e5d35e63.1a979",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "Debug Pump Status",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 380,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "a7f4d9d2.5b7b58",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "7c68c9dc.80a128",
+        "order": 3,
+        "width": 6,
+        "height": 2,
+        "name": "Pump Status",
+        "label": "Pump Status",
+        "format": "{{msg.payload.status}} ({{msg.payload.manual ? 'Manual' : 'Auto'}} Mode)",
+        "layout": "row-spread",
+        "className": "",
+        "x": 370,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "c6a8d9d1.4c1c68",
+        "type": "ui_button",
+        "z": "f6f2187d.f17ca8",
+        "name": "Manual Pump Control",
+        "group": "7c68c9dc.80a128",
+        "order": 4,
+        "width": 3,
+        "height": 2,
+        "passthru": false,
+        "label": "Toggle Pump",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "fa-power-off",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "water/pump/manual",
+        "topicType": "str",
+        "x": 150,
+        "y": 340,
+        "wires": [
+            [
+                "f9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "f9b7e8d2.c5b8c8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Toggle Pump",
+        "func": "// Get current pump status\nconst currentStatus = flow.get('pumpStatus') || false;\nconst newStatus = !currentStatus;\n\n// Update flow variable\nflow.set('pumpStatus', newStatus);\nflow.set('manualMode', true);\n\nreturn {\n    payload: {\n        status: newStatus ? 'ON' : 'OFF',\n        value: newStatus ? 1 : 0,\n        timestamp: new Date().toISOString(),\n        manual: true\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 340,
+        "wires": [
+            [
+                "3b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "3b8c7d9e.4f9b42",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Manual Control",
+        "topic": "water/pump/manual",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 610,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "a2c7d9e1.4f9b42",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Store Water Level",
+        "func": "// Store current water level in flow context\nflow.set('waterLevel', msg.payload.level_percentage);\n\n// Pass through the message\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b2c7d9e1.4f9b42",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Store Pump Status",
+        "func": "// Store pump status and mode in flow context\nflow.set('pumpStatus', msg.payload.status === 'ON');\nflow.set('manualMode', msg.payload.manual);\n\n// Pass through the message\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d6a8d9d1.4c1c68",
+        "type": "ui_button",
+        "z": "f6f2187d.f17ca8",
+        "name": "Auto Mode",
+        "group": "7c68c9dc.80a128",
+        "order": 5,
+        "width": 3,
+        "height": 2,
+        "passthru": false,
+        "label": "Auto Mode",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "fa-robot",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "water/manual",
+        "topicType": "str",
+        "x": 130,
+        "y": 400,
+        "wires": [
+            [
+                "e9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "e9b7e8d2.c5b8c8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Switch to Auto Mode",
+        "func": "// Switch to auto mode\nflow.set('manualMode', false);\n\nreturn {\n    payload: {\n        manual: false,\n        timestamp: new Date().toISOString()\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 460,
+        "wires": [
+            [
+                "2b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "2b8c7d9e.4f9b42",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Manual Mode",
+        "topic": "water/manual",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 610,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "c7a8d9d1.4c1c68",
+        "type": "ui_slider",
+        "z": "f6f2187d.f17ca8",
+        "name": "Low Threshold",
+        "label": "Low Threshold",
+        "tooltip": "",
+        "group": "8c68c9dc.80a128",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "passthru": true,
+        "outs": "end",
+        "topic": "low_threshold",
+        "topicType": "str",
+        "min": 0,
+        "max": "50",
+        "step": 1,
+        "className": "",
+        "x": 140,
+        "y": 520,
+        "wires": [
+            [
+                "d9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "d7a8d9d1.4c1c68",
+        "type": "ui_slider",
+        "z": "f6f2187d.f17ca8",
+        "name": "High Threshold",
+        "label": "High Threshold",
+        "tooltip": "",
+        "group": "8c68c9dc.80a128",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "passthru": true,
+        "outs": "end",
+        "topic": "high_threshold",
+        "topicType": "str",
+        "min": "50",
+        "max": "100",
+        "step": 1,
+        "className": "",
+        "x": 140,
+        "y": 580,
+        "wires": [
+            [
+                "c9b7e8d2.c5b8c8"
+            ]
+        ]
+    },
+    {
+        "id": "d9b7e8d2.c5b8c8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set Low Threshold",
+        "func": "// Store low threshold in flow context\nflow.set('low_threshold', msg.payload);\n\n// Ensure high threshold is higher than low threshold\nconst highThreshold = flow.get('high_threshold') || 80;\nif (msg.payload >= highThreshold) {\n    // Adjust high threshold to be at least 10% higher than low threshold\n    const newHighThreshold = Math.min(100, msg.payload + 10);\n    flow.set('high_threshold', newHighThreshold);\n}\n\nreturn {\n    topic: \"threshold_update\",\n    payload: {\n        low_threshold: msg.payload,\n        high_threshold: flow.get('high_threshold')\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "// Initialize with default values\nflow.set('low_threshold', 20);\nif (!flow.get('high_threshold')) {\n    flow.set('high_threshold', 80);\n}",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 520,
+        "wires": [
+            [
+                "1b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "c9b7e8d2.c5b8c8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set High Threshold",
+        "func": "// Store high threshold in flow context\nflow.set('high_threshold', msg.payload);\n\n// Ensure low threshold is lower than high threshold\nconst lowThreshold = flow.get('low_threshold') || 20;\nif (msg.payload <= lowThreshold) {\n    // Adjust low threshold to be at least 10% lower than high threshold\n    const newLowThreshold = Math.max(0, msg.payload - 10);\n    flow.set('low_threshold', newLowThreshold);\n}\n\nreturn {\n    topic: \"threshold_update\",\n    payload: {\n        low_threshold: flow.get('low_threshold'),\n        high_threshold: msg.payload\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "// Initialize with default values\nflow.set('high_threshold', 80);\nif (!flow.get('low_threshold')) {\n    flow.set('low_threshold', 20);\n}",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 580,
+        "wires": [
+            [
+                "1b8c7d9e.4f9b42"
+            ]
+        ]
+    },
+    {
+        "id": "1b8c7d9e.4f9b42",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Thresholds",
+        "topic": "water/thresholds",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 610,
+        "y": 550,
+        "wires": []
+    },
+    {
+        "id": "e7a8d9d1.4c1c68",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "7c68c9dc.80a128",
+        "order": 6,
+        "width": 6,
+        "height": 1,
+        "name": "Water Usage Status",
+        "label": "Water Usage",
+        "format": "{{msg.payload.water_usage ? 'Active (' + msg.payload.outflow_rate + ' L/min)' : 'Inactive'}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 540,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "f7a8d9d1.4c1c68",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "Flow Rate Gauge",
+        "group": "7c68c9dc.80a128",
+        "order": 7,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "Flow Rate",
+        "label": "L/min",
+        "format": "{{msg.payload.outflow_rate}}",
+        "min": 0,
+        "max": "20",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "5",
+        "seg2": "10",
+        "diff": false,
+        "className": "",
+        "x": 380,
+        "y": 280,
+        "wires": []
+    }
+]

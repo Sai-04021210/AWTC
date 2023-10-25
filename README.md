@@ -8,6 +8,8 @@ The project is organized as follows:
 
 ```
 AWTC/
+├── Dockerfile                        # Docker configuration for the application
+├── docker-compose.yml                # Docker Compose configuration for easy deployment
 ├── main.py                           # Main script to run both simulator and controller
 ├── src/
 │   ├── water_level_server/           # Water level simulator module
@@ -120,8 +122,38 @@ Options:
 └─────────────────┘               └─────────────────┘               └─────────────────┘
 ```
 
+## Docker Deployment
+
+The easiest way to run this project is using Docker:
+
+### Prerequisites
+
+- Docker and Docker Compose installed on your system
+
+### Running with Docker Compose
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/yourusername/AWTC.git
+   cd AWTC
+   ```
+
+2. Start the application with a single command:
+   ```
+   docker-compose up -d
+   ```
+
+3. Access the Node-RED dashboard:
+   - Open your browser and navigate to http://localhost:1880/ui
+
+4. To stop the application:
+   ```
+   docker-compose down
+   ```
+
 ## Troubleshooting
 
 - If you have issues with MQTT connection, ensure the broker is running and accessible
 - If the dashboard doesn't update, check the MQTT topics in Node-RED match those used by the Python script
 - For manual mode issues, ensure the correct topics are being used for communication
+- For Docker-related issues, check the logs with `docker-compose logs`

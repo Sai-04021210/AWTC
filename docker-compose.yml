@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  awlc:
+    build: .
+    container_name: awlc
+    ports:
+      - "1880:1880"  # Node-RED web interface
+      - "1883:1883"  # MQTT broker
+      - "9001:9001"  # MQTT websockets (if needed)
+    volumes:
+      - ./flows:/app/flows
+      - node_red_data:/data
+    restart: unless-stopped
+
+volumes:
+  node_red_data:
