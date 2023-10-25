@@ -15,7 +15,9 @@ RUN apt-get update && apt-get install -y \
     mosquitto \
     mosquitto-clients \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /run/mosquitto \
+    && chown mosquitto:mosquitto /run/mosquitto
 
 # Install Node-RED
 RUN npm install -g --unsafe-perm node-red
@@ -41,4 +43,4 @@ COPY . .
 EXPOSE 1880 1883 9001
 
 # Start services
-CMD ["bash", "-c", "service mosquitto start && node-red --settings config/settings.js & python main.py"]
+CMD ["bash", "-c", "mosquitto -d && node-red --settings config/settings.js & python main.py"]
