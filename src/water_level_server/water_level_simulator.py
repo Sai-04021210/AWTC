@@ -170,11 +170,17 @@ class WaterLevelSimulator:
             volume_change_cm3 = self.tank_area * usage
             outflow_rate = (volume_change_cm3 / 1000) * (60 / self.interval)
 
-        # In manual mode, if no water usage and pump is off, keep level constant
-        if self.manual_mode and not self.water_usage and not self.pump_status:
-            level_change = 0
-            inflow_rate = 0.0
-            outflow_rate = 0.0
+        # In manual mode, behavior depends on pump status and water usage
+        if self.manual_mode:
+            # Log the manual mode status for debugging
+            logger.debug(f"Manual mode active: Pump is {'ON' if self.pump_status else 'OFF'}, " +
+                        f"Water usage is {'active' if self.water_usage else 'inactive'}")
+
+            # If no water usage and pump is off, keep level constant
+            if not self.water_usage and not self.pump_status:
+                level_change = 0
+                inflow_rate = 0.0
+                outflow_rate = 0.0
 
         # Calculate net flow rate
         self.current_flow_rate = inflow_rate - outflow_rate

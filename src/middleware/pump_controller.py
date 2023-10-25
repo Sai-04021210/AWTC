@@ -28,6 +28,8 @@ DEFAULT_LEVEL_TOPIC = "water/level"
 DEFAULT_PUMP_TOPIC = "water/pump"
 DEFAULT_MANUAL_TOPIC = "water/manual"
 DEFAULT_MANUAL_CONTROL_TOPIC = "water/pump/manual"
+DEFAULT_HIGH_THRESHOLD_TOPIC = "water/threshold/high"
+DEFAULT_LOW_THRESHOLD_TOPIC = "water/threshold/low"
 DEFAULT_HIGH_THRESHOLD = 80  # Turn off pump when water level is above 80%
 DEFAULT_LOW_THRESHOLD = 20   # Turn on pump when water level is below 20%
 
@@ -35,6 +37,7 @@ class PumpController:
     def __init__(self, broker=DEFAULT_BROKER, port=DEFAULT_PORT,
                  level_topic=DEFAULT_LEVEL_TOPIC, pump_topic=DEFAULT_PUMP_TOPIC,
                  manual_topic=DEFAULT_MANUAL_TOPIC, manual_control_topic=DEFAULT_MANUAL_CONTROL_TOPIC,
+                 high_threshold_topic=DEFAULT_HIGH_THRESHOLD_TOPIC, low_threshold_topic=DEFAULT_LOW_THRESHOLD_TOPIC,
                  high_threshold=DEFAULT_HIGH_THRESHOLD, low_threshold=DEFAULT_LOW_THRESHOLD):
         """Initialize the pump controller."""
         self.broker = broker
@@ -43,6 +46,8 @@ class PumpController:
         self.pump_topic = pump_topic
         self.manual_topic = manual_topic
         self.manual_control_topic = manual_control_topic
+        self.high_threshold_topic = high_threshold_topic
+        self.low_threshold_topic = low_threshold_topic
         self.high_threshold = high_threshold
         self.low_threshold = low_threshold
         self.client = None
@@ -81,6 +86,13 @@ class PumpController:
             self.client.subscribe(self.manual_control_topic)
             logger.info(f"Subscribed to {self.manual_control_topic}")
 
+            # Subscribe to threshold topics
+            self.client.subscribe(self.high_threshold_topic)
+            logger.info(f"Subscribed to {self.high_threshold_topic}")
+
+            self.client.subscribe(self.low_threshold_topic)
+            logger.info(f"Subscribed to {self.low_threshold_topic}")
+
             # Publish initial pump status and manual mode
             self._publish_pump_status()
             self._publish_manual_mode()
@@ -108,31 +120,56 @@ class PumpController:
 
             elif msg.topic == self.manual_control_topic:
                 # Handle manual pump control
-                if 'status' in payload:
-                    self.manual_mode = True
+                if 'manual' in payload:
+                    self.manual_mode = bool(payload['manual'])
+                    logger.info(f"Manual mode set to: {'ON' if self.manual_mode else 'OFF'}")
                     self._publish_manual_mode()
 
+                    # If switching to auto mode, process current level
+                    if not self.manual_mode:
+                        logger.info("Switching to automatic mode")
+                        self._process_water_level(self.current_level)
+                        return
+
+                # Handle pump status changes in manual mode
+                if 'status' in payload:
                     new_status = payload['status'] == 'ON'
                     if new_status != self.pump_status:
                         logger.info(f"Manual control: Setting pump to {'ON' if new_status else 'OFF'}")
                         self.pump_status = new_status
                         self._publish_pump_status()
                 elif 'value' in payload:
-                    self.manual_mode = True
-                    self._publish_manual_mode()
-
                     new_status = bool(payload['value'])
                     if new_status != self.pump_status:
                         logger.info(f"Manual control: Setting pump to {'ON' if new_status else 'OFF'}")
                         self.pump_status = new_status
                         self._publish_pump_status()
-                elif 'manual' in payload and not payload['manual']:
-                    # Switch back to auto mode
-                    self.manual_mode = False
-                    logger.info("Switching back to automatic mode")
-                    self._publish_manual_mode()
-                    # Process current level to update pump status
-                    self._process_water_level(self.current_level)
+
+            elif msg.topic == self.high_threshold_topic:
+                # Handle high threshold updates
+                if 'high_threshold' in payload:
+                    new_threshold = float(payload['high_threshold'])
+                    if new_threshold > self.low_threshold:
+                        self.high_threshold = new_threshold
+                        logger.info(f"Updated high threshold to {self.high_threshold}%")
+                        # Re-evaluate water level with new threshold if in auto mode
+                        if not self.manual_mode:
+                            self._process_water_level(self.current_level)
+                    else:
+                        logger.warning(f"Rejected high threshold {new_threshold}% as it's not greater than low threshold {self.low_threshold}%")
+
+            elif msg.topic == self.low_threshold_topic:
+                # Handle low threshold updates
+                if 'low_threshold' in payload:
+                    new_threshold = float(payload['low_threshold'])
+                    if new_threshold < self.high_threshold:
+                        self.low_threshold = new_threshold
+                        logger.info(f"Updated low threshold to {self.low_threshold}%")
+                        # Re-evaluate water level with new threshold if in auto mode
+                        if not self.manual_mode:
+                            self._process_water_level(self.current_level)
+                    else:
+                        logger.warning(f"Rejected low threshold {new_threshold}% as it's not less than high threshold {self.high_threshold}%")
 
         except json.JSONDecodeError:
             logger.error(f"Failed to decode JSON message: {msg.payload}")
@@ -152,6 +189,10 @@ class PumpController:
             logger.info(f"Water level ({level_percentage}%) below low threshold ({self.low_threshold}%). Turning pump ON.")
             self.pump_status = True
             self._publish_pump_status()
+        else:
+            # Log current status for debugging
+            status_str = "ON" if self.pump_status else "OFF"
+            logger.info(f"Auto mode active: Water level at {level_percentage}%. Pump remains {status_str}.")
 
     def _publish_pump_status(self):
         """Publish pump status to MQTT topic."""
@@ -232,6 +273,10 @@ def parse_arguments():
                         help='MQTT topic to publish manual mode status')
     parser.add_argument('--manual-control-topic', default=DEFAULT_MANUAL_CONTROL_TOPIC,
                         help='MQTT topic to receive manual control commands')
+    parser.add_argument('--high-threshold-topic', default=DEFAULT_HIGH_THRESHOLD_TOPIC,
+                        help='MQTT topic to receive high threshold updates')
+    parser.add_argument('--low-threshold-topic', default=DEFAULT_LOW_THRESHOLD_TOPIC,
+                        help='MQTT topic to receive low threshold updates')
     parser.add_argument('--high-threshold', type=float, default=DEFAULT_HIGH_THRESHOLD,
                         help='High water level threshold percentage to turn pump OFF')
     parser.add_argument('--low-threshold', type=float, default=DEFAULT_LOW_THRESHOLD,
@@ -247,6 +292,8 @@ if __name__ == "__main__":
         pump_topic=args.pump_topic,
         manual_topic=args.manual_topic,
         manual_control_topic=args.manual_control_topic,
+        high_threshold_topic=args.high_threshold_topic,
+        low_threshold_topic=args.low_threshold_topic,
         high_threshold=args.high_threshold,
         low_threshold=args.low_threshold
     )
