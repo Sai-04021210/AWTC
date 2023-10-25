@@ -29,34 +29,46 @@ DEFAULT_PORT = 1883
 DEFAULT_LEVEL_TOPIC = "water/level"
 DEFAULT_PUMP_TOPIC = "water/pump"
 DEFAULT_MANUAL_TOPIC = "water/manual"
+DEFAULT_CLEANING_TOPIC = "water/cleaning"  # Topic for cleaning mode
+DEFAULT_FLUSH_TOPIC = "water/flush"  # Topic for flush mode
 DEFAULT_TANK_HEIGHT = 100  # cm
 DEFAULT_INTERVAL = 2  # seconds
 DEFAULT_USAGE_RATE = 0.8  # cm per interval when water is being used
 DEFAULT_TANK_DIAMETER = 50  # cm - for calculating volume
 DEFAULT_FILL_RATE = 2.0  # cm per interval when pump is on
+DEFAULT_CLEANING_RATE = 3.0  # cm per interval when cleaning is active
+DEFAULT_FLUSH_RATE = 5.0  # cm per interval when flush is active - faster than cleaning
 
 class WaterLevelSimulator:
     def __init__(self, broker=DEFAULT_BROKER, port=DEFAULT_PORT,
                  level_topic=DEFAULT_LEVEL_TOPIC, pump_topic=DEFAULT_PUMP_TOPIC,
-                 manual_topic=DEFAULT_MANUAL_TOPIC, tank_height=DEFAULT_TANK_HEIGHT,
+                 manual_topic=DEFAULT_MANUAL_TOPIC, cleaning_topic=DEFAULT_CLEANING_TOPIC,
+                 flush_topic=DEFAULT_FLUSH_TOPIC, tank_height=DEFAULT_TANK_HEIGHT,
                  interval=DEFAULT_INTERVAL, usage_rate=DEFAULT_USAGE_RATE,
-                 tank_diameter=DEFAULT_TANK_DIAMETER, fill_rate=DEFAULT_FILL_RATE):
+                 tank_diameter=DEFAULT_TANK_DIAMETER, fill_rate=DEFAULT_FILL_RATE,
+                 cleaning_rate=DEFAULT_CLEANING_RATE, flush_rate=DEFAULT_FLUSH_RATE):
         """Initialize the water level simulator."""
         self.broker = broker
         self.port = port
         self.level_topic = level_topic
         self.pump_topic = pump_topic
         self.manual_topic = manual_topic
+        self.cleaning_topic = cleaning_topic
+        self.flush_topic = flush_topic
         self.tank_height = tank_height
         self.interval = interval
         self.usage_rate = usage_rate
         self.tank_diameter = tank_diameter
         self.fill_rate = fill_rate
+        self.cleaning_rate = cleaning_rate
+        self.flush_rate = flush_rate
         self.client = None
         self.current_level = random.uniform(40, 60)  # Start with random level
         self.pump_status = False  # Pump is initially OFF
         self.manual_mode = False  # Auto mode by default
         self.water_usage = True   # Simulate water being used
+        self.cleaning_mode = False  # Cleaning mode is initially OFF
+        self.flush_mode = False  # Flush mode is initially OFF
         self.connected = False
         self.current_flow_rate = 0.0  # Current flow rate in L/min
 
@@ -90,12 +102,18 @@ class WaterLevelSimulator:
             self.connected = True
             logger.info("Connected to MQTT broker")
 
-            # Subscribe to pump status and manual mode topics
+            # Subscribe to pump status, manual mode, cleaning mode, and flush mode topics
             self.client.subscribe(self.pump_topic)
             logger.info(f"Subscribed to {self.pump_topic}")
 
             self.client.subscribe(self.manual_topic)
             logger.info(f"Subscribed to {self.manual_topic}")
+
+            self.client.subscribe(self.cleaning_topic)
+            logger.info(f"Subscribed to {self.cleaning_topic}")
+
+            self.client.subscribe(self.flush_topic)
+            logger.info(f"Subscribed to {self.flush_topic}")
         else:
             logger.error(f"Failed to connect to MQTT broker with code {rc}")
 
@@ -122,6 +140,20 @@ class WaterLevelSimulator:
                 if "manual" in payload:
                     self.manual_mode = bool(payload["manual"])
                     logger.info(f"Manual mode updated: {'ON' if self.manual_mode else 'OFF'}")
+
+            elif msg.topic == self.cleaning_topic:
+                if "cleaning" in payload:
+                    self.cleaning_mode = bool(payload["cleaning"])
+                    logger.info(f"Cleaning mode updated: {'ON' if self.cleaning_mode else 'OFF'}")
+
+            elif msg.topic == self.flush_topic:
+                if "flush" in payload:
+                    self.flush_mode = bool(payload["flush"])
+                    logger.info(f"Flush mode updated: {'ON' if self.flush_mode else 'OFF'}")
+                    # If flush mode is activated, turn off cleaning mode to avoid conflicts
+                    if self.flush_mode and self.cleaning_mode:
+                        self.cleaning_mode = False
+                        logger.info("Cleaning mode turned OFF due to flush activation")
 
         except json.JSONDecodeError:
             logger.error(f"Failed to decode JSON message: {msg.payload}")
@@ -170,6 +202,32 @@ class WaterLevelSimulator:
             volume_change_cm3 = self.tank_area * usage
             outflow_rate = (volume_change_cm3 / 1000) * (60 / self.interval)
 
+        # If cleaning mode is active, water level decreases faster
+        if self.cleaning_mode:
+            # Cleaning rate (with some randomness)
+            cleaning = self.cleaning_rate * random.uniform(0.9, 1.1)
+            level_change -= cleaning
+
+            # Add to outflow rate for cleaning
+            volume_change_cm3 = self.tank_area * cleaning
+            cleaning_outflow = (volume_change_cm3 / 1000) * (60 / self.interval)
+            outflow_rate += cleaning_outflow
+
+            logger.info(f"Cleaning mode active: Additional outflow rate: {round(cleaning_outflow, 2)} L/min")
+
+        # If flush mode is active, water level decreases much faster
+        if self.flush_mode:
+            # Flush rate (with some randomness)
+            flush = self.flush_rate * random.uniform(0.95, 1.05)
+            level_change -= flush
+
+            # Add to outflow rate for flushing
+            volume_change_cm3 = self.tank_area * flush
+            flush_outflow = (volume_change_cm3 / 1000) * (60 / self.interval)
+            outflow_rate += flush_outflow
+
+            logger.info(f"Flush mode active: Additional outflow rate: {round(flush_outflow, 2)} L/min")
+
         # In manual mode, behavior depends on pump status and water usage
         if self.manual_mode:
             # Log the manual mode status for debugging
@@ -210,6 +268,8 @@ class WaterLevelSimulator:
             "pump_status": "ON" if self.pump_status else "OFF",
             "water_usage": self.water_usage,
             "manual_mode": self.manual_mode,
+            "cleaning_mode": self.cleaning_mode,
+            "flush_mode": self.flush_mode,
             "inflow_rate": round(inflow_rate, 2),  # L/min
             "outflow_rate": round(outflow_rate, 2),  # L/min
             "net_flow_rate": round(self.current_flow_rate, 2)  # L/min
@@ -263,6 +323,8 @@ def parse_arguments():
     parser.add_argument('--level-topic', default=DEFAULT_LEVEL_TOPIC, help='MQTT topic to publish water level')
     parser.add_argument('--pump-topic', default=DEFAULT_PUMP_TOPIC, help='MQTT topic for pump status')
     parser.add_argument('--manual-topic', default=DEFAULT_MANUAL_TOPIC, help='MQTT topic for manual mode')
+    parser.add_argument('--cleaning-topic', default=DEFAULT_CLEANING_TOPIC, help='MQTT topic for cleaning mode')
+    parser.add_argument('--flush-topic', default=DEFAULT_FLUSH_TOPIC, help='MQTT topic for flush mode')
     parser.add_argument('--tank-height', type=float, default=DEFAULT_TANK_HEIGHT,
                         help='Tank height in cm')
     parser.add_argument('--tank-diameter', type=float, default=DEFAULT_TANK_DIAMETER,
@@ -273,6 +335,10 @@ def parse_arguments():
                         help='Water usage rate in cm per interval')
     parser.add_argument('--fill-rate', type=float, default=DEFAULT_FILL_RATE,
                         help='Fill rate in cm per interval when pump is on')
+    parser.add_argument('--cleaning-rate', type=float, default=DEFAULT_CLEANING_RATE,
+                        help='Cleaning rate in cm per interval when cleaning is active')
+    parser.add_argument('--flush-rate', type=float, default=DEFAULT_FLUSH_RATE,
+                        help='Flush rate in cm per interval when flush is active')
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -283,10 +349,14 @@ if __name__ == "__main__":
         level_topic=args.level_topic,
         pump_topic=args.pump_topic,
         manual_topic=args.manual_topic,
+        cleaning_topic=args.cleaning_topic,
+        flush_topic=args.flush_topic,
         tank_height=args.tank_height,
         tank_diameter=args.tank_diameter,
         interval=args.interval,
         usage_rate=args.usage_rate,
-        fill_rate=args.fill_rate
+        fill_rate=args.fill_rate,
+        cleaning_rate=args.cleaning_rate,
+        flush_rate=args.flush_rate
     )
     simulator.run()

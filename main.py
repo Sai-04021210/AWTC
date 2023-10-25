@@ -4,7 +4,7 @@ Water Level Control System - Main Script
 This script runs both the water level simulator and pump controller
 in separate threads.
 
-Created: May 1, 2023
+Created: October 15, 2023
 """
 
 import threading
@@ -12,8 +12,9 @@ import logging
 import time
 import argparse
 from src.water_level_server.water_level_simulator import WaterLevelSimulator, DEFAULT_BROKER, DEFAULT_PORT, \
-    DEFAULT_LEVEL_TOPIC, DEFAULT_PUMP_TOPIC, DEFAULT_MANUAL_TOPIC, DEFAULT_TANK_HEIGHT, \
-    DEFAULT_INTERVAL, DEFAULT_USAGE_RATE, DEFAULT_TANK_DIAMETER, DEFAULT_FILL_RATE
+    DEFAULT_LEVEL_TOPIC, DEFAULT_PUMP_TOPIC, DEFAULT_MANUAL_TOPIC, DEFAULT_CLEANING_TOPIC, DEFAULT_FLUSH_TOPIC, \
+    DEFAULT_TANK_HEIGHT, DEFAULT_INTERVAL, DEFAULT_USAGE_RATE, DEFAULT_TANK_DIAMETER, DEFAULT_FILL_RATE, \
+    DEFAULT_CLEANING_RATE, DEFAULT_FLUSH_RATE
 from src.middleware.pump_controller import PumpController, DEFAULT_HIGH_THRESHOLD, DEFAULT_LOW_THRESHOLD, \
     DEFAULT_MANUAL_CONTROL_TOPIC, DEFAULT_HIGH_THRESHOLD_TOPIC, DEFAULT_LOW_THRESHOLD_TOPIC
 
@@ -32,6 +33,8 @@ def parse_arguments():
     parser.add_argument('--level-topic', default=DEFAULT_LEVEL_TOPIC, help='MQTT topic for water level')
     parser.add_argument('--pump-topic', default=DEFAULT_PUMP_TOPIC, help='MQTT topic for pump status')
     parser.add_argument('--manual-topic', default=DEFAULT_MANUAL_TOPIC, help='MQTT topic for manual mode')
+    parser.add_argument('--cleaning-topic', default=DEFAULT_CLEANING_TOPIC, help='MQTT topic for cleaning mode')
+    parser.add_argument('--flush-topic', default=DEFAULT_FLUSH_TOPIC, help='MQTT topic for flush mode')
     parser.add_argument('--manual-control-topic', default=DEFAULT_MANUAL_CONTROL_TOPIC, help='MQTT topic for manual control')
     parser.add_argument('--high-threshold-topic', default=DEFAULT_HIGH_THRESHOLD_TOPIC, help='MQTT topic for high threshold')
     parser.add_argument('--low-threshold-topic', default=DEFAULT_LOW_THRESHOLD_TOPIC, help='MQTT topic for low threshold')
@@ -40,6 +43,8 @@ def parse_arguments():
     parser.add_argument('--interval', type=float, default=DEFAULT_INTERVAL, help='Update interval in seconds')
     parser.add_argument('--usage-rate', type=float, default=DEFAULT_USAGE_RATE, help='Water usage rate in cm per interval')
     parser.add_argument('--fill-rate', type=float, default=DEFAULT_FILL_RATE, help='Fill rate in cm per interval when pump is on')
+    parser.add_argument('--cleaning-rate', type=float, default=DEFAULT_CLEANING_RATE, help='Cleaning rate in cm per interval')
+    parser.add_argument('--flush-rate', type=float, default=DEFAULT_FLUSH_RATE, help='Flush rate in cm per interval')
     parser.add_argument('--high-threshold', type=float, default=DEFAULT_HIGH_THRESHOLD, help='High water level threshold percentage')
     parser.add_argument('--low-threshold', type=float, default=DEFAULT_LOW_THRESHOLD, help='Low water level threshold percentage')
     return parser.parse_args()
@@ -47,7 +52,7 @@ def parse_arguments():
 def main():
     """Main function to run both simulator and controller."""
     args = parse_arguments()
-    
+
     # Create simulator and controller instances
     simulator = WaterLevelSimulator(
         broker=args.broker,
@@ -55,13 +60,17 @@ def main():
         level_topic=args.level_topic,
         pump_topic=args.pump_topic,
         manual_topic=args.manual_topic,
+        cleaning_topic=args.cleaning_topic,
+        flush_topic=args.flush_topic,
         tank_height=args.tank_height,
         tank_diameter=args.tank_diameter,
         interval=args.interval,
         usage_rate=args.usage_rate,
-        fill_rate=args.fill_rate
+        fill_rate=args.fill_rate,
+        cleaning_rate=args.cleaning_rate,
+        flush_rate=args.flush_rate
     )
-    
+
     controller = PumpController(
         broker=args.broker,
         port=args.port,
@@ -74,25 +83,25 @@ def main():
         high_threshold=args.high_threshold,
         low_threshold=args.low_threshold
     )
-    
+
     # Start simulator and controller in separate threads
     simulator_thread = threading.Thread(target=simulator.run)
     controller_thread = threading.Thread(target=controller.run)
-    
+
     simulator_thread.daemon = True
     controller_thread.daemon = True
-    
+
     simulator_thread.start()
     controller_thread.start()
-    
+
     logger.info("Water Level Control System started")
-    
+
     try:
         # Keep the main thread alive
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         logger.info("System stopped by user")
-        
+
 if __name__ == "__main__":
     main()

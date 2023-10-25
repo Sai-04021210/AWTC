@@ -1,0 +1,121 @@
+[
+    {
+        "id": "flush_tank_button",
+        "type": "ui_button",
+        "z": "f6f2187d.f17ca8",
+        "name": "Flush Tank Button",
+        "group": "g4e9f5b.f17ca8",
+        "order": 7,
+        "width": 6,
+        "height": 1,
+        "passthru": false,
+        "label": "Flush Tank",
+        "tooltip": "Start tank flushing (rapidly empties the tank)",
+        "color": "",
+        "bgcolor": "#FF5722",
+        "className": "",
+        "icon": "fa-tint-slash",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 130,
+        "y": 960,
+        "wires": [
+            [
+                "flush_tank_function"
+            ]
+        ]
+    },
+    {
+        "id": "flush_tank_function",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Toggle Flush Mode",
+        "func": "// Get current flush state from flow context or default to false\nconst currentFlushMode = flow.get('flushMode') || false;\n\n// Toggle the flush mode\nconst newFlushMode = !currentFlushMode;\n\n// Store the new state in flow context\nflow.set('flushMode', newFlushMode);\n\n// If turning on flush mode, turn off cleaning mode to avoid conflicts\nif (newFlushMode) {\n    flow.set('cleaningMode', false);\n}\n\n// Create message payload\nreturn {\n    payload: {\n        flush: newFlushMode,\n        timestamp: new Date().toISOString()\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 960,
+        "wires": [
+            [
+                "flush_tank_mqtt",
+                "flush_tank_status"
+            ]
+        ]
+    },
+    {
+        "id": "flush_tank_mqtt",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Publish Flush Mode",
+        "topic": "water/flush",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5b277f9b.9d604",
+        "x": 630,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "flush_tank_status",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "g4e9f5b.f17ca8",
+        "order": 8,
+        "width": 6,
+        "height": 1,
+        "name": "Flush Status",
+        "label": "Flush Mode:",
+        "format": "{{msg.payload.flush ? \"ON\" : \"OFF\"}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 630,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "flush_mode_status",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Flush Mode Status",
+        "topic": "water/level",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "5b277f9b.9d604",
+        "x": 150,
+        "y": 1020,
+        "wires": [
+            [
+                "flush_mode_function"
+            ]
+        ]
+    },
+    {
+        "id": "flush_mode_function",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Extract Flush Mode",
+        "func": "// Store flush mode in flow context\nif (msg.payload.flush_mode !== undefined) {\n    flow.set('flushMode', msg.payload.flush_mode);\n}\n\n// Format message for display\nreturn {\n    payload: {\n        flush: msg.payload.flush_mode\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 1020,
+        "wires": [
+            [
+                "flush_tank_status"
+            ]
+        ]
+    }
+]
