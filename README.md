@@ -17,12 +17,7 @@ AWTC/
 │   └── middleware/                   # Middleware module
 │       └── pump_controller.py        # Controls the pump based on water level
 └── flows/
-    ├── simplified_water_level_dashboard.json  # Main Node-RED flow
-    └── archive/                      # Archive of older flows
-        ├── water_level_dashboard.json
-        ├── improved_dashboard_flow.json
-        ├── simple_flow.json
-        └── minimal_flow.json
+    └── simplified_water_level_dashboard.json  # Main Node-RED flow
 ```
 
 ## Overview
