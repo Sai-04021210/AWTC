@@ -24,7 +24,7 @@ RUN npm install -g --unsafe-perm node-red
 WORKDIR /app
 
 # Copy package files and install Node-RED dependencies
-COPY package.json package-lock.json ./
+COPY node-red/package.json node-red/package-lock.json ./
 RUN npm install
 
 # Copy Python requirements and install
@@ -32,7 +32,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy Mosquitto configuration
-COPY mosquitto.conf /etc/mosquitto/conf.d/
+COPY config/mosquitto.conf /etc/mosquitto/conf.d/
 
 # Copy application code
 COPY . .
@@ -41,4 +41,4 @@ COPY . .
 EXPOSE 1880 1883 9001
 
 # Start services
-CMD ["bash", "-c", "service mosquitto start && node-red --settings settings.js & python main.py"]
+CMD ["bash", "-c", "service mosquitto start && node-red --settings config/settings.js & python main.py"]

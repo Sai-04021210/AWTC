@@ -8,16 +8,25 @@ The project is organized as follows:
 
 ```
 AWTC/
-├── Dockerfile                        # Docker configuration for the application
-├── docker-compose.yml                # Docker Compose configuration for easy deployment
-├── main.py                           # Main script to run both simulator and controller
-├── src/
+├── config/                           # Configuration files
+│   ├── mosquitto.conf                # MQTT broker configuration
+│   └── settings.js                   # Node-RED settings
+├── docker/                           # Docker-related files
+│   ├── Dockerfile                    # Docker configuration for the application
+│   ├── docker-compose.yml            # Docker Compose configuration for easy deployment
+│   └── .dockerignore                 # Files to exclude from Docker build
+├── node-red/                         # Node-RED related files
+│   ├── package.json                  # Node.js dependencies
+│   ├── package-lock.json             # Dependency lock file
+│   └── flows/                        # Node-RED flows
+│       └── simplified_water_level_dashboard.json  # Main Node-RED flow
+├── src/                              # Python source code
 │   ├── water_level_server/           # Water level simulator module
 │   │   └── water_level_simulator.py  # Simulates water level readings
 │   └── middleware/                   # Middleware module
 │       └── pump_controller.py        # Controls the pump based on water level
-└── flows/
-    └── simplified_water_level_dashboard.json  # Main Node-RED flow
+├── main.py                           # Main script to run both simulator and controller
+└── requirements.txt                  # Python dependencies
 ```
 
 ## Overview
@@ -135,6 +144,7 @@ The easiest way to run this project is using Docker:
 
 2. Start the application with a single command:
    ```
+   cd docker
    docker-compose up -d
    ```
 
