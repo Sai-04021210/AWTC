@@ -1,6 +1,6 @@
 # Automated Water Level Control System (AWLC)
 
-A system for monitoring water levels in a tank and automatically controlling a water pump based on the readings.
+A system for monitoring water levels in a tank and automatically controlling a water pump based on the readings. The system uses MQTT for communication between components and provides a real-time dashboard for monitoring and control.
 
 ## Project Structure
 
