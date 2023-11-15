@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     lsb-release \
-    && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y \
     && mkdir -p /run/mosquitto \
     && chown mosquitto:mosquitto /run/mosquitto
 
-# Install Node-RED
-RUN npm install -g --unsafe-perm node-red
+# Install Node-RED and dashboard nodes
+RUN npm install -g --unsafe-perm node-red node-red-dashboard
 
 # Set working directory
 WORKDIR /app
@@ -42,5 +42,10 @@ COPY . .
 # Expose ports
 EXPOSE 1880 1883 9001
 
+# Copy and set permissions for entrypoint script
+COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Start services
-CMD ["bash", "-c", "mosquitto -d && node-red --settings config/settings.js & python main.py"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD [""]

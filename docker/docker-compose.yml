@@ -12,7 +12,7 @@ services:
       - "9001:9001"  # MQTT websockets (if needed)
     volumes:
       - ../node-red/flows:/app/node-red/flows
-      - node_red_data:/data
+      - node_red_data:/root/.node-red
     restart: unless-stopped
 
 volumes:

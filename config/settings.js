@@ -526,7 +526,7 @@ module.exports = {
      *  middleware:{function or array}, (req,res,next) - http middleware
      *  ioMiddleware:{function or array}, (socket,next) - socket.io middleware
      */
-    //ui: { path: "ui" },
+    ui: { path: "ui" },
 
     /** Colourise the console output of the debug node */
     //debugUseColors: true,
