@@ -66,7 +66,7 @@ class WaterLevelSimulator:
         self.current_level = random.uniform(40, 60)  # Start with random level
         self.pump_status = False  # Pump is initially OFF
         self.manual_mode = False  # Auto mode by default
-        self.water_usage = True   # Simulate water being used
+        self.water_usage = False  # Disable automatic water usage
         self.cleaning_mode = False  # Cleaning mode is initially OFF
         self.flush_mode = False  # Flush mode is initially OFF
         self.connected = False
@@ -162,18 +162,8 @@ class WaterLevelSimulator:
 
     def simulate_water_level(self):
         """Simulate changing water level in the tank."""
-        # Update water usage pattern
-        self.usage_timer += 1
-        if self.water_usage and self.usage_timer >= self.usage_duration:
-            self.water_usage = False
-            self.usage_timer = 0
-            self.no_usage_duration = random.randint(10, 30)
-            logger.info("Water usage stopped")
-        elif not self.water_usage and self.usage_timer >= self.no_usage_duration:
-            self.water_usage = True
-            self.usage_timer = 0
-            self.usage_duration = random.randint(5, 15)
-            logger.info("Water usage started")
+        # Water usage is disabled - no random water usage patterns
+        # The water level will only change due to pump, cleaning, or flush actions
 
         # Calculate level change based on pump status and water usage
         level_change = 0
