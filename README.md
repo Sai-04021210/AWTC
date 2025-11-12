@@ -1,100 +1,45 @@
 # Automated Water Level Control System (AWLC)
 
-A system for monitoring water levels in a tank and automatically controlling a water pump based on the readings. The system uses MQTT for communication between components and provides a real-time dashboard for monitoring and control.
+A system for monitoring water levels in a tank and automatically controlling a water pump based on threshold readings. The system uses MQTT for communication between components and provides a real-time dashboard for monitoring and control.
 
-## Project Structure
-
-The project is organized as follows:
-
-```
-AWTC/
-├── config/                           # Configuration files
-│   ├── mosquitto.conf                # MQTT broker configuration
-│   └── settings.js                   # Node-RED settings
-├── docker/                           # Docker-related files
-│   ├── Dockerfile                    # Docker configuration for the application
-│   ├── docker-compose.yml            # Docker Compose configuration for easy deployment
-│   ├── docker-entrypoint.sh          # Startup script for the Docker container
-│   └── .dockerignore                 # Files to exclude from Docker build
-├── node-red/                         # Node-RED related files
-│   ├── package.json                  # Node.js dependencies
-│   ├── package-lock.json             # Dependency lock file
-│   └── flows/                        # Node-RED flows
-│       └── simplified_water_level_dashboard.json  # Main Node-RED flow
-├── src/                              # Python source code
-│   ├── water_level_server/           # Water level simulator module
-│   │   └── water_level_simulator.py  # Simulates water level readings
-│   └── middleware/                   # Middleware module
-│       └── pump_controller.py        # Controls the pump based on water level
-├── main.py                           # Main script to run both simulator and controller
-└── requirements.txt                  # Python dependencies
-```
-
-## Overview
-
-This project implements an automated water level monitoring and control system using:
-
-- Python for water level simulation and pump control
-- MQTT for communication between components
-- Node-RED for dashboard visualization and control
-- Docker for easy deployment and containerization
-
-## System Requirements
-
-### For Docker Deployment
-- Docker Engine 19.03.0+
-- Docker Compose 1.27.0+
-- 1GB RAM minimum
-- 2GB free disk space
-
-### For Manual Installation
-- Python 3.6+
-- Node.js 14.0+ (for Node-RED)
-- MQTT Broker (e.g., Mosquitto)
-- npm (Node Package Manager)
-
-## Command Line Options
-
-When running the Python scripts manually, the following options are available:
-
-- `--broker`: MQTT broker address (default: localhost)
-- `--port`: MQTT broker port (default: 1883)
-- `--tank-height`: Tank height in cm (default: 100)
-- `--interval`: Update interval in seconds (default: 2)
-- `--high-threshold`: High water level threshold percentage (default: 80)
-- `--low-threshold`: Low water level threshold percentage (default: 20)
-
-Example:
-```
-python main.py --broker localhost --port 1883 --tank-height 150 --interval 1
-```
-
-## Dashboard Features
-
-The Node-RED dashboard provides the following features:
-
-1. **Water Level Display**:
-   - Real-time gauge showing current water level percentage
-   - Historical chart of water level changes
-
-2. **Pump Control**:
-   - Current pump status indicator
-   - Manual pump control switch
-   - Auto/Manual mode selection buttons
-
-3. **System Settings**:
-   - Adjustable high and low water thresholds
-   - Flow rate indicators (inflow and outflow)
-   - Control mode status indicator
+![Main Dashboard](screenshots/dashboard-main.png)
 
 ## Features
 
-- **Water Level Simulation**: Simulates changing water levels with natural fluctuations
-- **Automatic Pump Control**: Turns the pump on/off based on water level thresholds
-- **Real-time Dashboard**: Visualizes water levels and pump status
-- **Manual Override**: Allows manual control of the pump from the dashboard
-- **Configurable Thresholds**: Adjustable high and low water level thresholds
-- **Flow Rate Display**: Shows water flow rate in liters per minute
+- Real-time water level monitoring with live gauge and historical charts
+- Automatic pump control based on configurable thresholds
+- Interactive web dashboard built with Node-RED
+- Manual override capability for pump control
+- Configurable high and low water level thresholds
+- Flow rate monitoring (inflow and outflow)
+- Flush tank functionality for quick draining
+- Docker-based deployment for easy setup
+
+## Quick Start
+
+### Prerequisites
+
+- Docker and Docker Compose installed on your system
+
+### Installation and Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/AWTC.git
+   cd AWTC
+   ```
+
+2. Start the system:
+   ```bash
+   cd docker
+   docker compose up -d
+   ```
+
+3. Access the dashboard:
+   - Dashboard UI: http://localhost:1880/ui
+   - Node-RED Editor: http://localhost:1880
+
+The system is now running and ready to use.
 
 ## System Architecture
 
@@ -103,166 +48,354 @@ The Node-RED dashboard provides the following features:
 │  Water Level    │  water/level  │  Pump           │  water/pump   │  Node-RED       │
 │  Simulator      │───────────────▶  Controller     │───────────────▶  Dashboard      │
 └─────────────────┘               └─────────────────┘               └─────────────────┘
+        ▲                                                                     │
+        │                                                                     │
+        └─────────────────────── MQTT Commands ─────────────────────────────┘
 ```
 
-## Running the Application
+## Project Structure
 
-There are two ways to run this application: using Docker (recommended) or manually.
+```
+AWTC/
+├── config/                           # Configuration files
+│   ├── mosquitto.conf                # MQTT broker configuration
+│   └── settings.js                   # Node-RED settings
+├── docker/                           # Docker deployment files
+│   ├── Dockerfile                    # Application container configuration
+│   ├── docker-compose.yml            # Multi-container orchestration
+│   └── docker-entrypoint.sh          # Container startup script
+├── node-red/                         # Node-RED flows and configuration
+│   ├── package.json                  # Node.js dependencies
+│   └── flows/
+│       └── simplified_water_level_dashboard.json
+├── src/                              # Python source code
+│   ├── water_level_server/           # Water level simulation module
+│   │   └── water_level_simulator.py
+│   └── middleware/                   # Middleware components
+│       └── pump_controller.py        # Pump control logic
+├── main.py                           # Main application entry point
+├── requirements.txt                  # Python dependencies
+└── README.md                         # Project documentation
+```
 
-### Option 1: Docker Deployment (Recommended)
+## Docker Commands
 
-The easiest way to run this project is using Docker, which packages all components together and handles their configuration automatically.
+### Basic Operations
 
-#### Prerequisites
+Start the system:
+```bash
+docker compose up -d
+```
 
-- Docker and Docker Compose installed on your system
+Stop the system:
+```bash
+docker compose down
+```
 
-#### Running with Docker Compose
+View logs:
+```bash
+docker compose logs -f
+```
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/yourusername/AWTC.git
-   cd AWTC
-   ```
+Restart the system:
+```bash
+docker compose restart
+```
 
-2. Start the application with a single command:
-   ```
-   cd docker
-   docker-compose up -d
-   ```
+### Advanced Operations
 
-3. Access the Node-RED dashboard:
-   - Open your browser and navigate to http://localhost:1880/ui
-   - The Node-RED editor is available at http://localhost:1880
+Rebuild after code changes:
+```bash
+docker compose up --build -d
+```
 
-4. To stop the application:
-   ```
-   docker-compose down
-   ```
+View specific container logs:
+```bash
+docker logs awlc
+```
 
-5. If you make changes to the code, rebuild and restart:
-   ```
-   docker-compose up --build -d
-   ```
+Check container status:
+```bash
+docker compose ps
+```
 
-6. To view logs:
-   ```
-   docker logs awlc
-   ```
+Remove everything including volumes:
+```bash
+docker compose down -v
+```
 
-#### Port Configuration
+## Dashboard Overview
 
-The Docker setup uses the following ports:
-- 1880: Node-RED web interface
-- 1884: MQTT broker (mapped to 1883 inside the container)
-- 9001: MQTT websockets (if needed)
+The Node-RED dashboard provides comprehensive monitoring and control capabilities:
 
-If you have conflicts with these ports, you can modify them in the `docker/docker-compose.yml` file:
+### Water Level Display
+- Real-time gauge showing current water level percentage
+- Historical chart displaying water level trends over time
+
+### Pump Controls
+- Status indicator showing current pump state
+- Manual control switch for pump override
+- Auto/Manual mode selection
+- Flush tank button for emergency draining
+
+### System Settings
+- High threshold configuration (default: 80%)
+- Low threshold configuration (default: 20%)
+- Flow rate display in liters per minute
+
+![Dashboard Controls](screenshots/control-panel.png)
+
+## Configuration
+
+### Port Configuration
+
+The system uses the following ports:
+
+| Port | Service | Description |
+|------|---------|-------------|
+| 1880 | Node-RED | Web interface and editor |
+| 1884 | MQTT | MQTT broker (internal port 1883) |
+| 9001 | WebSocket | MQTT WebSocket connection |
+
+To modify port mappings, edit `docker/docker-compose.yml`:
 
 ```yaml
 ports:
-  - "1880:1880"  # Format: "HOST_PORT:CONTAINER_PORT"
-  - "1884:1883"  # Change 1884 to another available port
-  - "9001:9001"  # Change if needed
+  - "1880:1880"  # Format: HOST_PORT:CONTAINER_PORT
+  - "1884:1883"  # Change host port if needed
+  - "9001:9001"
 ```
 
-### Option 2: Manual Setup
+### Water Level Parameters
 
-If you prefer to run components separately or can't use Docker, follow these steps:
+When running the Python application manually, the following command-line options are available:
 
-#### Prerequisites
+```bash
+python main.py \
+  --broker localhost \
+  --port 1883 \
+  --tank-height 150 \
+  --interval 1 \
+  --high-threshold 80 \
+  --low-threshold 20
+```
 
-- Python 3.6+
-- MQTT Broker (e.g., Mosquitto)
-- Node-RED with dashboard nodes installed
-- Paho MQTT Python client
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| --broker | localhost | MQTT broker address |
+| --port | 1883 | MQTT broker port |
+| --tank-height | 100 | Tank height in centimeters |
+| --interval | 2 | Update interval in seconds |
+| --high-threshold | 80 | High water level threshold (%) |
+| --low-threshold | 20 | Low water level threshold (%) |
 
-#### Installation
+## Manual Installation
 
-1. Install the required Python packages:
-   ```
-   pip install -r requirements.txt
-   ```
+If you prefer not to use Docker, follow these steps:
 
-2. Install MQTT broker (Mosquitto):
-   - Mac: `brew install mosquitto`
-   - Linux: `sudo apt-get install mosquitto`
-   - Windows: Download from https://mosquitto.org/download/
+### 1. Install Dependencies
 
-3. Install Node-RED:
-   - Follow instructions at https://nodered.org/docs/getting-started/
+Install Python packages:
+```bash
+pip install -r requirements.txt
+```
 
-4. Install Node-RED dashboard nodes:
-   ```
-   cd ~/.node-red
-   npm install node-red-dashboard
-   ```
+Install MQTT Broker:
+```bash
+# macOS
+brew install mosquitto
 
-#### Running Components Manually
+# Ubuntu/Debian
+sudo apt-get install mosquitto
 
-1. Start the MQTT Broker:
-   ```
-   mosquitto -c config/mosquitto.conf
-   ```
+# Windows
+# Download from https://mosquitto.org/download/
+```
 
-2. Start Node-RED:
-   ```
-   node-red --settings config/settings.js
-   ```
+Install Node-RED:
+```bash
+npm install -g node-red
+cd ~/.node-red
+npm install node-red-dashboard
+```
 
-3. Import the flow in Node-RED:
-   - Open http://localhost:1880
-   - Import the flow from `node-red/flows/simplified_water_level_dashboard.json`
-   - Deploy the flow
+### 2. Start Components
 
-4. Start the Water Level Control System:
-   ```
-   python main.py --broker localhost
-   ```
+Start MQTT Broker:
+```bash
+mosquitto -c config/mosquitto.conf
+```
 
-## Configuration Files
+Start Node-RED:
+```bash
+node-red --settings config/settings.js
+```
 
-Key configuration files and what to modify if needed:
+Import Dashboard Flow:
+1. Open http://localhost:1880
+2. Click the menu (top right) and select Import
+3. Select the file `node-red/flows/simplified_water_level_dashboard.json`
+4. Click Deploy
 
-### 1. docker/docker-compose.yml
-- Port mappings for Node-RED and MQTT
-- Volume mounts for persistent data
-
-### 2. config/settings.js
-- Node-RED settings
-- Dashboard UI path (currently set to `/ui`)
-- HTTP and WebSocket configurations
-
-### 3. config/mosquitto.conf
-- MQTT broker settings
-- Listener ports and protocols
-
-### 4. docker/docker-entrypoint.sh
-- Startup sequence for the Docker container
-- Component initialization
+Start Water Level System:
+```bash
+python main.py --broker localhost
+```
 
 ## Troubleshooting
 
-- **Missing UI Components**: If dashboard elements show as "unknown", ensure node-red-dashboard is installed
-- **MQTT Connection Issues**:
-  - Check if the broker is running (`docker logs awlc | grep mosquitto`)
-  - Verify the broker address and port are correct
-- **Dashboard Not Updating**:
-  - Check MQTT topics in Node-RED match those used by the Python script
-  - Verify the UI path is correctly set in settings.js (`ui: { path: "ui" }`)
-- **Port Conflicts**:
-  - If ports are already in use, modify the port mappings in docker-compose.yml
-  - Common conflicts: 1880 (Node-RED), 1883/1884 (MQTT)
-- **Docker Issues**:
-  - Check logs with `docker logs awlc`
-  - Rebuild with `docker-compose up --build -d` after code changes
+### Dashboard Not Loading
 
-## Updates (November 15, 2023)
+**Problem:** Dashboard shows blank page or errors
 
-The following improvements were made to the project:
-- Fixed Node-RED dashboard installation in Docker
+**Solution:**
+```bash
+# Check if containers are running
+docker compose ps
+
+# Check logs for errors
+docker compose logs
+
+# Restart the system
+docker compose restart
+```
+
+### MQTT Connection Issues
+
+**Problem:** No data appearing on dashboard
+
+**Solution:**
+```bash
+# Check MQTT broker status
+docker compose logs mosquitto
+
+# Verify MQTT connectivity
+docker compose exec awlc python -c "import paho.mqtt.client as mqtt; print('MQTT OK')"
+
+# Restart services
+docker compose restart
+```
+
+### Port Already in Use
+
+**Problem:** Error message "port is already allocated"
+
+**Solution:**
+
+Find what is using the port:
+```bash
+# macOS/Linux
+lsof -i :1880
+
+# Windows
+netstat -ano | findstr :1880
+```
+
+Either stop the conflicting service or change the port in `docker/docker-compose.yml`.
+
+### Dashboard Components Missing
+
+**Problem:** UI shows "unknown" elements or missing components
+
+**Solution:**
+```bash
+# Rebuild with fresh installation
+docker compose down
+docker compose up --build -d
+```
+
+### Container Keeps Restarting
+
+**Problem:** Container status shows constant restarting
+
+**Solution:**
+```bash
+# Check detailed error logs
+docker logs awlc --tail 100
+
+# Common causes:
+# - Missing Python dependencies: Verify requirements.txt
+# - Port conflicts: Check docker-compose.yml port mappings
+# - Permission issues: Verify volume mount permissions
+```
+
+## System Requirements
+
+### Docker Deployment (Recommended)
+- Docker Engine 20.10.0 or higher
+- Docker Compose V2
+- Minimum 1GB RAM
+- 2GB free disk space
+
+### Manual Installation
+- Python 3.8 or higher
+- Node.js 16.0 or higher
+- MQTT Broker (Mosquitto 2.0+)
+- npm 8.0 or higher
+
+## Recent Updates
+
+**November 15, 2023**
+- Fixed Node-RED dashboard installation in Docker container
 - Added proper MQTT broker configuration
-- Corrected Python script execution path in docker-entrypoint.sh
-- Updated settings.js to enable dashboard UI
-- Improved volume mounting for persistent data
-- Added detailed documentation for both Docker and manual setup
+- Improved Python script execution in docker-entrypoint.sh
+- Enhanced settings.js for dashboard UI functionality
+- Added persistent data volumes
+- Added flush tank functionality
+- Disabled automatic water draining for better manual control
+
+## Screenshots
+
+### Main Dashboard View
+![Main Dashboard](screenshots/dashboard-main.png)
+
+### Node-RED Editor
+![Node-RED Flow](screenshots/node-red-editor.png)
+
+### Water Level Gauge
+![Water Level Gauge](screenshots/water-level-gauge.png)
+
+### Historical Charts
+![Historical Data](screenshots/historical-chart.png)
+
+## Technical Details
+
+### MQTT Topics
+
+The system uses the following MQTT topics:
+
+- `water/level` - Current water level readings
+- `water/pump` - Pump status and commands
+- `water/control/mode` - Control mode (auto/manual)
+- `water/thresholds` - Threshold configuration
+- `water/flush` - Flush tank command
+
+### Component Communication
+
+1. Water Level Simulator publishes level readings to `water/level`
+2. Pump Controller subscribes to `water/level` and publishes to `water/pump`
+3. Node-RED dashboard subscribes to all topics for display
+4. Dashboard publishes commands for manual control
+
+## Contributing
+
+Contributions are welcome. Please submit pull requests or open issues for bug reports and feature requests.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Support
+
+For issues and questions:
+
+1. Check the Troubleshooting section above
+2. Review Docker logs: `docker compose logs`
+3. Open an issue on GitHub with:
+   - Problem description
+   - Log output
+   - System information (OS, Docker version)
+
+---
+
+Automated Water Level Control System - IoT Project
